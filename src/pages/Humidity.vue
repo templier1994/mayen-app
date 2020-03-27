@@ -34,7 +34,7 @@
 
     var newPath;
     var oldPath;
-//    const AUTOREALOADTIME = 300000;                           // autoreload time constant
+    const AUTOREALOADTIME = 300000;                           // autoreload time constant
 
 
     const client = new Influx.InfluxDB({
@@ -88,24 +88,24 @@
             this.reloadPage()                                   // function to reload the page
         },
 
-//        created() {
-//            this.autoReload()                                  // autoreload the page with timer
-//        },
+        created() {
+            this.autoReload()                                  // autoreload the page with timer
+        },
 
-//        beforeDestroy() {
-//            clearInterval(this.timerReload)                     // VERY IMPORTANT to delete the timer
-//        },
+        beforeDestroy() {
+            clearInterval(this.timerReload)                     // VERY IMPORTANT to delete the timer
+        },
 
         methods : {
             /**
              * reload de page with timer to have allways the last value displayed
              */
- //           autoReload : function(){
- //               this.timerReload = setInterval(() => {
- //                   console.log("timer !!!!!!!!!!!!!!!!!!!!!!!!!!")
- //                   location.reload()
- //               }, AUTOREALOADTIME)
- //       },
+           autoReload : function(){
+               this.timerReload = setInterval(() => {
+                   console.log("timer humidity !!!!!!!!!!!!!!!!!!!!!!!!!!")
+                   location.reload()
+               }, AUTOREALOADTIME)
+       },
 
             /**
              * reload de page when the user switch the room
@@ -196,7 +196,7 @@
 
         data () {
             return {
-//                timerReload : null,                                     //this is for the auto reaload
+                timerReload : null,                                     //this is for the auto reaload
 
                 series_level : [{
                     name: "",

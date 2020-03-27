@@ -36,7 +36,7 @@
     var newPath;
     var oldPath;
     const ALERTTEMPERATURE = 10;                                // min value for the alert temperature to small
-    const AUTOREALOADTIME = 60000; //300000                               // autoreload time constant 5 minutes
+    const AUTOREALOADTIME = 300000; //300000                               // autoreload time constant 5 minutes
 
 
 
@@ -93,7 +93,7 @@
         },
 
         updated(){
-            this.alertTemperature();                            // pop up an alert for the temperature
+ //           this.alertTemperature();                            // pop up an alert for the temperature
         },
 
         created() {
@@ -110,8 +110,8 @@
              */
             autoReload : function(){
                 this.timerReload = setInterval(() => {
-                    console.log("timer !!!!!!!!!!!!!!!!!!!!!!!!!!")
- //                   location.reload()
+                    console.log("timer temperature !!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    location.reload()
 
                     // test to call the graphical reload here
 
