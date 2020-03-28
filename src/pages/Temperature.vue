@@ -35,7 +35,7 @@
 
     var newPath;
     var oldPath;
-    const ALERTTEMPERATURE = 10;                                // min value for the alert temperature to small
+    const ALERTTEMPERATURE = 3;                                // min value for the alert temperature to small
     const AUTOREALOADTIME = 300000; //300000                               // autoreload time constant 5 minutes
 
 
@@ -204,7 +204,7 @@
 
             },
 //----------------------------------------------------------------------------------------------------------------------
-            //last temperature : cuisine 8°, douche 1°
+
             alertTemperature: function () {
                 if (this.lastBatteryValue < ALERTTEMPERATURE) {
                     alert("ATTENTION température actuelle : " + this.lastBatteryValue + "°C dans la " + this.sectorName )
