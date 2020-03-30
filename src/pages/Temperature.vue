@@ -33,13 +33,16 @@
     import StockChart from '../components/StockChart.vue'
     import credInflux from "../constants/influx";
 
-    var newPath;
-    var oldPath;
-    const ALERTTEMPERATURE = 3;                                // min value for the alert temperature to small
-    const AUTOREALOADTIME = 20000; //300000                               // autoreload time constant 5 minutes
+    var newPath;                                                            // new path taken from the URL
+    var oldPath;                                                            // old path taken from the URL
+    const ALERTTEMPERATURE = 3;                                             // min value for the alert temperature to small
+    const AUTOREALOADTIME = 300000; //300000                                 // autoreload time constant 5 minutes
 
 
-
+    /**
+     * influx connection data
+     * @type {InfluxDB}
+     */
     const client = new Influx.InfluxDB({
         database: credInflux.database,
         host: credInflux.host,
@@ -61,30 +64,33 @@
         },
 
         mounted () {
-            newPath = this.sectorName
-            console.log(newPath)
-            NProgress.start();
+            newPath = this.sectorName                           // save the new path
+            console.log(newPath)                                // display it
+            NProgress.start();                                  // progress bar, it's funny
 
             this.refresh(newPath);                              //load data in the graph
 
             oldPath=newPath                                     // save the path in oldPath, used in function reloadPage
-            console.log("oldpath: " + oldPath);
+            console.log("oldpath: " + oldPath);                 // display it
 
         },
 
-
+        // done when before the page updated
         beforeUpdate() {
             this.reloadPage()                                   // function to reload the page
         },
 
+        // done when the page update
         updated(){
  //           this.alertTemperature();                            // pop up an alert for the temperature
         },
 
+        // done when the page has been created
         created() {
             this.autoReload()                                  // autoreload the page with timer
         },
 
+        // done before the page destroyed
         beforeDestroy() {
             clearInterval(this.timerReload)                     // VERY IMPORTANT to delete the timer
         },
@@ -92,6 +98,7 @@
         methods : {
             /**
              * function to refresh the graph
+             * refresh only the chart
              */
             refresh: function(page){
                 switch(page.toString().toLowerCase()){
@@ -117,7 +124,6 @@
                 this.timerReload = setInterval(() => {
                     console.log("timer temperature !!!!!!!!!!!!!!!!!!!!!!!!!!")
                         this.refresh(oldPath);
-
                 }, AUTOREALOADTIME)
             },
 

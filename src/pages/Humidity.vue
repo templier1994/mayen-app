@@ -32,11 +32,14 @@
 
 
 
-    var newPath;
-    var oldPath;
-    const AUTOREALOADTIME = 20000;   //300000                        // autoreload time constant
+    var newPath;                                                    // new path from URL
+    var oldPath;                                                    // old path from URL
+    const AUTOREALOADTIME = 300000;   //300000                       // autoreload time constant
 
-
+    /**
+     * influx connection data
+     * @type {InfluxDB}
+     */
     const client = new Influx.InfluxDB({
         database: credInflux.database,
         host: credInflux.host,
@@ -57,10 +60,11 @@
             StockChart,
         },
 
+        //do it when the page is mounted
         mounted () {
-            newPath = this.sectorName
-            console.log(newPath)
-            NProgress.start();
+            newPath = this.sectorName                                             // save the new url path
+            console.log(newPath)                                                  // display it
+            NProgress.start();                                                    // progress bar, it is funny
 
 
             // switch to know which data i have to load : cuisine, douche or exterieur
@@ -80,18 +84,21 @@
 
             }
             oldPath=newPath                                     // save the path in oldPath, used in function reloadPage
-            console.log("oldpath: " + oldPath);
+            console.log("oldpath: " + oldPath);                 // display old path
 
         },
 
+        //do it before an update
         beforeUpdate() {
             this.reloadPage()                                   // function to reload the page
         },
 
+        //do it when the page is created
         created() {
             this.autoReload()                                  // autoreload the page with timer
         },
 
+        // do it before the page distroyed
         beforeDestroy() {
             clearInterval(this.timerReload)                     // VERY IMPORTANT to delete the timer
         },
@@ -100,6 +107,7 @@
 
             /**
              * function to refresh the graph
+             * page is here to test the URL and load the correct data
              */
             refresh: function(page){
                 switch(page.toString().toLowerCase()){
@@ -120,17 +128,17 @@
             },
             /**
              * reload de page with timer to have allways the last value displayed
+             * the refresh() method only replace the values of the chart
              */
            autoReload : function(){
                this.timerReload = setInterval(() => {
                    console.log("timer humidity !!!!!!!!!!!!!!!!!!!!!!!!!!")
                    this.refresh(oldPath);
-
                }, AUTOREALOADTIME)
        },
 
             /**
-             * reload de page when the user switch the room
+             * reload the page when the user switch the room
              */
             reloadPage : function(){
                 newPath = this.sectorName

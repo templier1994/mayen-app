@@ -137,17 +137,18 @@
     export default {
         name: "Statistic",
 
-    beforeMount() {
-        this.loadTemperatureMinCuisine()
-        this.loadTemperatureMaxCuisine()
-        this.loadTemperatureMinDouche()
-        this.loadTemperatureMaxDouche()
-        this.loadHumidityMinCuisine()
-        this.loadHumidityMaxCuisine()
-        this.loadHumidityMinDouche()
-        this.loadHumidityMaxDouche()
+        // load all data before the page mounted
+        beforeMount() {
+            this.loadTemperatureMinCuisine()
+            this.loadTemperatureMaxCuisine()
+            this.loadTemperatureMinDouche()
+            this.loadTemperatureMaxDouche()
+            this.loadHumidityMinCuisine()
+            this.loadHumidityMaxCuisine()
+            this.loadHumidityMinDouche()
+            this.loadHumidityMaxDouche()
 
-    },
+        },
 
         methods:{
             /**
@@ -280,7 +281,9 @@
         },
 
 
-
+        /*
+         * this is all the variable used at same time for the logic and for the HTML page
+         */
         data(){
             return{
                 temperatureMinCuisine : 0,
