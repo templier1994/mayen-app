@@ -36,7 +36,7 @@
     var newPath;
     var oldPath;
     const ALERTTEMPERATURE = 3;                                // min value for the alert temperature to small
-    const AUTOREALOADTIME = 300000; //300000                               // autoreload time constant 5 minutes
+    const AUTOREALOADTIME = 20000; //300000                               // autoreload time constant 5 minutes
 
 
 
@@ -65,23 +65,8 @@
             console.log(newPath)
             NProgress.start();
 
+            this.refresh(newPath);                              //load data in the graph
 
-            // switch to know which data i have to load : cuisine, douche or exterieur
-            switch(newPath.toString().toLowerCase()){
-                case "cuisine":
-                    this.loadTemperatureCuisineData();
-                    break;
-                case "douche":
-                    this.loadTemperatureDoucheData();
-                    break;
-                case "extérieur":
-                    this.loadTemperatureExterieurData();
-                    break;
-
-                default:
-                    break;
-
-            }
             oldPath=newPath                                     // save the path in oldPath, used in function reloadPage
             console.log("oldpath: " + oldPath);
 
@@ -106,14 +91,32 @@
 
         methods : {
             /**
+             * function to refresh the graph
+             */
+            refresh: function(page){
+                switch(page.toString().toLowerCase()){
+                    case "cuisine":
+                        this.loadTemperatureCuisineData();
+                        break;
+                    case "douche":
+                        this.loadTemperatureDoucheData();
+                        break;
+                    case "extérieur":
+                        this.loadTemperatureExterieurData();
+                        break;
+
+                    default:
+                        break;
+
+                }
+            },
+            /**
              * reload de page with timer to have allways the last value displayed
              */
             autoReload : function(){
                 this.timerReload = setInterval(() => {
                     console.log("timer temperature !!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    location.reload()
-
-                    // test to call the graphical reload here
+                        this.refresh(oldPath);
 
                 }, AUTOREALOADTIME)
             },

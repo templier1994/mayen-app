@@ -34,7 +34,7 @@
 
     var newPath;
     var oldPath;
-    const AUTOREALOADTIME = 300000;                           // autoreload time constant
+    const AUTOREALOADTIME = 20000;   //300000                        // autoreload time constant
 
 
     const client = new Influx.InfluxDB({
@@ -97,13 +97,35 @@
         },
 
         methods : {
+
+            /**
+             * function to refresh the graph
+             */
+            refresh: function(page){
+                switch(page.toString().toLowerCase()){
+                    case "cuisine":
+                        this.loadHumidityCuisineData();
+                        break;
+                    case "douche":
+                        this.loadHumidityDoucheData();
+                        break;
+                    case "extérieur":
+                        this.loadHumidityExterieurData();
+                        break;
+
+                    default:
+                        break;
+
+                }
+            },
             /**
              * reload de page with timer to have allways the last value displayed
              */
            autoReload : function(){
                this.timerReload = setInterval(() => {
                    console.log("timer humidity !!!!!!!!!!!!!!!!!!!!!!!!!!")
-                   location.reload()
+                   this.refresh(oldPath);
+
                }, AUTOREALOADTIME)
        },
 
