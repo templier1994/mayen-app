@@ -1,38 +1,32 @@
 <template>
     <div class="info" id="contact">
         <b-jumbotron>
-            <template v-slot:header>Ayent Snow</template>
+            <template v-slot:header>Home monitoring</template>
 
             <template v-slot:lead>
                 <br>
-                <p>Le projet de monitoring de l'état des routes par la</p>
-                <a href="https://www.hevs.ch/fr/" target="_blank">
-                    <img class="ml-3" src="https://www.hevs.ch/img/logo-hes-so-valais-2019.png" height="100em" >
+                <p>Le projet de monitoring de chalets</p>
+                <a href="https://swisstacticaldevelopment.ch/" target="_blank">
+                    <img class="ml-3" src="https://swisstacticaldevelopment.ch/storage/std-adapted.png" height="100em" >
                 </a>
 
                 <br><br>
 
-                <p class="m-3"> en partenariat avec</p>
-                <a href="https://www.ayent.ch/" target="_blank">
-                    <img class="pl-4" src="https://www.ayent.ch/data/images/accroches/wpThumbnails/Ayent.jpg" height="100em">
-                </a>
 
-                <br><br><br>
 
-                <p> HES-SO Haute école d'ingénierie </p>
-                <p> Route du Rawyl 47</p>
-                <p> Case postale 2134</p>
-                <p> 1950 Sion 2</p>
+                <p> Swiss Tactical Development </p>
+                <p> Rue de la chapelle 27</p>
+                <p> 1958 Uvrier</p>
                 <br>
-                <p> +41 (0)58 606 85 11</p>
-                <p> pierre-andre.mudry@hevs.ch </p>
+                <p> +41 (0)79 716 79 84</p>
+                <p> amos.jerome@swisstacticaldevelopment.ch </p>
 
                 <br><br>
 
             </template>
 
             <hr class="my-4">
-            <b-carousel
+  <!--          <b-carousel
                     id="carousel-fade"
                     style="text-shadow: 0 0 2px #000"
                     fade
@@ -50,7 +44,7 @@
                     <h3> source : anzere.ch</h3>
                 </b-carousel-slide>
 
-            </b-carousel>
+            </b-carousel> -->
         </b-jumbotron>
     </div>
 </template>

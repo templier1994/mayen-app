@@ -3,8 +3,8 @@
         <b-navbar toggleable="lg" type="light" id="navbar" >
                 <b-navbar-brand>
                     <div >
-                        <img class="" src="https://www.hevs.ch/img/logo-hes-so-valais-2019.png" height="50em" >
-                        <img class="pl-4" src="../assets/ayent.png" height="50em">
+                        <img class="" src="https://swisstacticaldevelopment.ch/storage/std-adapted.png" height="50em" >
+
                     </div>
 
                 </b-navbar-brand>
