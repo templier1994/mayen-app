@@ -2,11 +2,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import home from '../pages/Home'
-
+import neige from '../pages/Neige'
 import temperature from '../pages/Temperature'
-import humidity from '../pages/Humidity'
 import contact from '../pages/Contact'
-import statistic from '../pages/Statistic'
 
 Vue.use(Router)
 const router = new Router({
@@ -17,10 +15,10 @@ const router = new Router({
             component: home
         },
         {
-            path: '/humidity/:sectorName',
-            name: 'humidity',
+            path: '/neige/:sectorName',
+            name: 'neige',
             props: true,
-            component: humidity
+            component: neige
         },
         {
             path: '/temperature/:sectorName',
@@ -34,13 +32,7 @@ const router = new Router({
             component: contact
 
         },
-        {
-            path :'/statistic',
-            name : 'statistic',
-            component: statistic
-        },
     ],
-
 
 })
 

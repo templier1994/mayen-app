@@ -25,19 +25,19 @@ mapInit(Highcharts)
 addWorldMap(Highcharts)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(HighchartsVue)
+
 Vue.use(BootstrapVue)
 Vue.config.productionTip = true
 Vue.use(NProgress);
 Vue.use(VueResource);
 Vue.use(VueResizeText);
+
+
 export const serverBus = new Vue();
 //Object.defineProperty(Vue.prototype, '$ttn', { value : ttn});
 /* eslint-disable no-new */
-
 new Vue({
   el: '#app',
   router,
   render: h => h(App),
 })
-
-

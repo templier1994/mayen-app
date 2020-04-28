@@ -1,253 +1,486 @@
 <template>
-    <div class="level">
-        <h3 style="font-weight: bold">{{sectorName}}</h3>
-        <b-container class="bv-example-row bv-example-row-flex-cols">
-        <b-row class="m-4" align-h="center">
-            <b-col cols="4">
-                <b-card
-                        border-variant="secondary"
-                        header= "Température actuelle"
-                        header-border-variant="secondary"
-                        align="center"
-                        class=""
-                >
-                    <b-card-text v-if="lastBatteryValue > 0" class="h1"  style="color: #2c3e50">{{lastBatteryValue}} °C</b-card-text>
-                    <b-card-text v-if="lastBatteryValue <= 0" class="h1"  style="color: red">{{lastBatteryValue}} °C</b-card-text>
+    <div class="temperature" id="temperature">
+        <h3>{{sectorName}}</h3>
+        <!-- floor temperature -->
+        <!--
+        <b-row align-v="center" class="text-center">
 
+            <b-col sm="2">
+                <div class="mb-4" style="font-size: 130%">Temperature du sol </div>
+                <img src="../assets/svg/temperature.svg" class="my-auto" style="max-width: 50%"/>
+            </b-col>
 
-                </b-card>
+            <b-col sm>
+                <StockChart :data="series_temperatureFloor"/>
+            </b-col>
+
+            <b-col cols="2">
+                <div class = "" style="...">Temperature actuelle du sol</div>
+                <div class = "" style="..."> {{lastTemperatureFloorValue}} °C</div>
             </b-col>
         </b-row>
-        </b-container>
+
+        <br><br>
+        -->
+        <!-- sensor temperature -->
+        <!--
+        <b-row align-v="center" class="text-center">
+            <b-col sm="2">
+                <div class="mb-4" style="font-size: 130%">Temperature du capteur </div>
+                <img src="../assets/svg/temperature.svg" class="my-auto" style="max-width: 50%"/>
+            </b-col>
+            <b-col sm>
+                <StockChart :data="series_temperatureSensor"/>
+            </b-col>
+
+            <b-col cols="2">
+                <div class = "" style="...">Temperature actuelle du capteur</div>
+                <div class = "" style="..."> {{lastTemperatureSensorValue}} °C</div>
+            </b-col>
+        </b-row>
+        -->
+        <!-- dual chart-->
+        <br><br>
+        <b-row align-v="center" class="text-center">
+            <b-col sm="2">
+                <img src="../assets/svg/temperature.svg" class="my-auto" style="max-width: 50%"/>
+            </b-col>
+            <b-col sm> <!---->
+                <TemperatureChart :dataTemperatureChart="series_dual"/>
+            </b-col>
+
+            <b-col cols="2">
+                <div class = "" style="...">Temperature du capteur : {{dualSensorTemp}} °C</div>
+                <div class = "" style="..." >Temperature du sol : {{dualFloorTemp}} °C</div>
+            </b-col>
+        </b-row>
 
 
-        <StockChart :data="series_battery"/>
-    </div>
-
-</template>
-
-<script>
-    import Influx from 'influx'
-    import moment from 'moment'
-    import NProgress from 'nprogress'
-    import StockChart from '../components/StockChart.vue'
-    import credInflux from "../constants/influx";
-
-    var newPath;                                                            // new path taken from the URL
-    var oldPath;                                                            // old path taken from the URL
-    const ALERTTEMPERATURE = 3;                                             // min value for the alert temperature to small
-    const AUTOREALOADTIME = 300000; //300000                                 // autoreload time constant 5 minutes
 
 
-    /**
-     * influx connection data
-     * @type {InfluxDB}
-     */
-    const client = new Influx.InfluxDB({
-        database: credInflux.database,
-        host: credInflux.host,
-        port: credInflux.port,
-        protocol: credInflux.protocol,
-        username: credInflux.username,
-        password: credInflux.password
-    });
+        <br><br>
+        <!-- battery -->
+        <b-row align-v="center" class="text-center">
+            <b-col sm="2">
+                <img src="../assets/svg/battery.svg" class="my-auto" style="max-width: 50%"/>
+            </b-col>
+            <b-col sm>
+                <BatteryChart :dataBatteryChart="series_battery" />
+            </b-col>
+            <b-col cols="2">
+                <GaugeChart  :dataGaugeChart="parseFloat(lastBatteryValue)"/>
+            </b-col>
+        </b-row>
+
+        <!-- battery gauge -->
+<!--            <b-row align-v="center" class="text-center">-->
+<!--                 <b-col sm="2">-->
+<!--                     <img src="../assets/svg/battery.svg" class="my-auto" style="max-width: 50%"/>-->
+<!--                 </b-col>-->
+<!--                 <b-col sm>-->
+<!--                     <GaugeChart  :dataGaugeChart="parseFloat(lastBatteryValue)"/>-->
+<!--                 </b-col>-->
+<!--                 <b-col cols="2">-->
+<!--                     <div class = "" style="...">Niveau actuel de la batterie</div>-->
+<!--                     <div class = "" style="..."> {{lastBatteryValue}} V</div>-->
+<!--                 </b-col>-->
+<!--             </b-row>-->
 
 
-    export default {
-        props : [
-            'sectorName'
-        ],
-        name: 'level',
-        components: {
-            //chart: Chart,
-            StockChart,
-        },
 
-        mounted () {
-            newPath = this.sectorName                           // save the new path
-            console.log(newPath)                                // display it
-            NProgress.start();                                  // progress bar, it's funny
+         </div>
 
-            this.refresh(newPath);                              //load data in the graph
+     </template>
+     <style scoped>
+         #temperature {
+             font-family: Roboto;
+         }
 
-            oldPath=newPath                                     // save the path in oldPath, used in function reloadPage
-            console.log("oldpath: " + oldPath);                 // display it
+     </style>
 
-        },
+     <script>
+         import Influx from 'influx'
+         import moment from 'moment'
+         import NProgress from 'nprogress'
+         import credInflux from "../constants/influx"
+         import TemperatureChart from "../components/TemperatureChart";
+         import BatteryChart from "../components/BatteryChart";
+         import GaugeChart from "../components/GaugeChart";
 
-        // done when before the page updated
-        beforeUpdate() {
-            this.reloadPage()                                   // function to reload the page
-        },
 
-        // done when the page update
-        updated(){
- //           this.alertTemperature();                            // pop up an alert for the temperature
-        },
+         import exportingInit from "highcharts/modules/exporting";
 
-        // done when the page has been created
-        created() {
-            this.autoReload()                                  // autoreload the page with timer
-        },
+         import ChartModuleMore from 'highcharts/highcharts-more';
+         import HCSolidGauge from 'highcharts/modules/solid-gauge'
+         import Highcharts from "highcharts";
 
-        // done before the page destroyed
-        beforeDestroy() {
-            clearInterval(this.timerReload)                     // VERY IMPORTANT to delete the timer
-        },
+         exportingInit(Highcharts);
+         ChartModuleMore(Highcharts);
+         HCSolidGauge(Highcharts);
 
-        methods : {
-            /**
-             * function to refresh the graph
-             * refresh only the chart
-             */
-            refresh: function(page){
-                switch(page.toString().toLowerCase()){
-                    case "cuisine":
-                        this.loadTemperatureCuisineData();
-                        break;
-                    case "douche":
-                        this.loadTemperatureDoucheData();
-                        break;
-                    case "extérieur":
-                        this.loadTemperatureExterieurData();
-                        break;
 
-                    default:
-                        break;
+         var newPath;                                                    //new path taken from the URl
+         var oldPath;                                                    //old path taken from the URL
 
-                }
-            },
-            /**
-             * reload de page with timer to have allways the last value displayed
-             */
-            autoReload : function(){
-                this.timerReload = setInterval(() => {
-                    console.log("timer temperature !!!!!!!!!!!!!!!!!!!!!!!!!!")
-                        this.refresh(oldPath);
-                }, AUTOREALOADTIME)
-            },
 
-            /**
-             * reload de page when the user switch the room
-             */
-            reloadPage : function(){
-                newPath = this.sectorName
-                if(newPath !== oldPath){
-                    console.log("path as changed")
-                    location.reload()
-                }
-            },
 
-//---------- query data for the cuisine
-            /**
-             * get data from influx for the room cuisine
-             */
-            loadTemperatureCuisineData: function() {
-                 Promise.all([
-                        client.query('SELECT * FROM temperature_cuisine WHERE time>now()-365d' ), // WHERE time>now()-365d
-                    ]).then(parsedRes => {
-                        const mutatedArray = parsedRes.map( arr => {
-                            this.lastBatteryValue = arr[arr.length-1]['temperature'];
+         const client = new Influx.InfluxDB({
+             database: credInflux.database,
+             host: credInflux.host,
+             port: credInflux.port,
+             protocol: credInflux.protocol,
+             username: credInflux.username,
+             password: credInflux.password
+         });
 
-                            return Object.assign({}, {
-                                name: "temperature",
-                                turboThreshold:60000,
-                                data: arr.map( obj => Object.assign({}, {
-                                    x: (moment(obj.time).unix())*1000,
-                                    y: obj['temperature']
-                                }))
-                            });
-                        });
-                        this.series_battery = mutatedArray;
-                     NProgress.done();
-                    }).catch(error => console.log(error))
-            },
-//----------query data for the douche
-            /**
-             * get data from influx for the room douche
-             */
-            loadTemperatureDoucheData: function() {
-                Promise.all([
-                    client.query('SELECT * FROM temperature_douche WHERE time>now()-365d' ), // WHERE time>now()-365d
-                ]).then(parsedRes => {
+         export default {
+             props : [
+                 'sectorName'
+             ],
+             name: 'temperature',
+             components: {
+                 GaugeChart,
+                 BatteryChart,
+                 TemperatureChart,
+             },
+             mounted () {
+                 newPath = this.sectorName                               //save the new path to know witch page to load
+                 console.log("sectorname : " + this.sectorName)
+                 NProgress.start();
 
-                    const mutatedArray = parsedRes.map( arr => {
-                        this.lastBatteryValue = arr[arr.length-1]['temperature'];
-                        return Object.assign({}, {
-                            name: "temperature",
-                            turboThreshold:60000,
-                            data: arr.map( obj => Object.assign({}, {
-                                x: (moment(obj.time).unix())*1000,
-                                y: obj['temperature']
-                            }))
-                        });
-                    });
-                    this.series_battery = mutatedArray;
-                    NProgress.done()
-                }).catch(error => console.log(error))
+       //          this.loadTemperatureFloorData(this.createQueryTemperatureFloor(newPath));
 
-            },
-//---------------query data for the exterieur
-            /**
-             * get data from influx for the room exterieur
-             */
-            loadTemperatureExterieurData: function() {
-                Promise.all([
-                    client.query('SELECT * FROM temperature_exterieur WHERE time>now()-365d' ), // WHERE time>now()-365d
-                ]).then(parsedRes => {
+       //          this.loadTemperatureSensorData(this.createQueryTemperatureSensor(newPath));
 
-                    const mutatedArray = parsedRes.map( arr => {
-                        this.lastBatteryValue = arr[arr.length-1]['temperature'];
-                        return Object.assign({}, {
-                            name: "temperature",
-                            turboThreshold:60000,
-                            data: arr.map( obj => Object.assign({}, {
-                                x: (moment(obj.time).unix())*1000,
-                                y: obj['temperature']
-                            }))
-                        });
-                    });
-                    this.series_battery = mutatedArray;
-                    NProgress.done()
-                }).catch(error => console.log(error))
+                 this.dualData(this.createQueryTemperatureFloor(newPath), this.createQueryTemperatureSensor(newPath))
+                 this.loadBatterySensorData(this.createQueryBattery(newPath));
 
-            },
-//----------------------------------------------------------------------------------------------------------------------
 
-            alertTemperature: function () {
-                if (this.lastBatteryValue < ALERTTEMPERATURE) {
-                    alert("ATTENTION température actuelle : " + this.lastBatteryValue + "°C dans la " + this.sectorName )
+                 oldPath=newPath;
+             },
 
-                }
-            }
-        },
+             // done when before the page updated
+             beforeUpdate() {
+                 this.reloadPage()                                   // function to reload the page
+             },
 
-        data () {
-            return {
 
-                timerReload : null, //this is for the autoreaload
+             methods : {
+                 /**
+                  * reload de page when the user switch the room
+                  */
+                 reloadPage : function(){
+                     newPath = this.sectorName
+                     if(newPath !== oldPath){
+                         console.log(newPath)
+                         location.reload()
+                     }
+                 },
 
-                series_level : [{
-                    name: "",
-                    turboThreshold:60000,
-                    data: [],
+         //----------------------------------------------------------------------------------------------------------
 
-                }],
-                series_battery : [{
-                    name: "",
-                    turboThreshold:60000,
-                    data: [],
+                 /**
+                  * return the query in function of the path (sectorname) in real life this is the illuminance_value
+                  * @param page
+                  * @returns {string}
+                  */
+                 createQueryTemperatureFloor : function(page){
+                     let returnQuery
+                     switch(page.toString()){
+                         case "Télécabine":
+                             returnQuery = 'select "payload_fields_Illuminance_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/ambient_sensor_2/up' + "'"
+                             break;
+                         case "Pralan":
+                             returnQuery = 'select "payload_fields_Illuminance_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/70b3d57ba0000bd0/up' + "'"
+                             break;
+                         case "Pro de Savioz":
+                             returnQuery = ''
+                             break;
+                         default :
+                             console.log("returnQuery : switch default case")
+                             break;
+                     }
 
-                }],
-                lastLevelValue:"",
-                lastBatteryValue:""
-            }
+                     return returnQuery
+                 },
 
-        }
+                 /**
+                  * return the query in function of the path (sectorname) in real life this is the Air temperature_value
+                  * @param page
+                  * @returns {string}
+                  */
+                 createQueryTemperatureSensor : function(page){
+                     let returnQuery
+                     switch(page.toString()){
+                         case "Télécabine":
+                             returnQuery = 'select "payload_fields_Air temperature_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/ambient_sensor_2/up' + "'"
+                             break;
+                         case "Pralan":
+                             returnQuery = 'select "payload_fields_Air temperature_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/70b3d57ba0000bd0/up' + "'"
+                             break;
+                         case "Pro de Savioz":
+                             returnQuery = ''
+                             break;
+                         default :
+                             console.log("returnQuery : switch default case")
+                             break;
+                     }
 
-    }
-</script>
+                     return returnQuery
+                 },
 
-<style scoped>
+                 /**
+                  * return the query in function of the path (sectorname) in real life this is the battery voltage_value
+                  * @param page
+                  * @returns {string}
+                  */
+                 createQueryBattery : function(page){
+                     let returnQuery
+                     switch(page.toString()){
+                         case "Télécabine":
+                             returnQuery = 'SELECT "payload_fields_Battery voltage_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/ambient_sensor_2/up' + "'"
+                             break;
+                         case "Pralan":
+                             returnQuery = 'SELECT "payload_fields_Battery voltage_value" from mqtt_consumer WHERE topic = ' + "'" + 'ayent_monitoring/devices/70b3d57ba0000bd0/up' + "'"
+                             break;
+                         case "Pro de Savioz":
+                             returnQuery = ''
+                             break;
+                         default :
+                             console.log("returnQuery : switch default case")
+                             break;
+                     }
 
-</style>
+                     return returnQuery
+                 },
+         //----------------------------------------------------------------------------------------------------------
+                 /**
+                  * load temperature of the floor data from the database
+                  * @param paramQuery
+                  */
+                 // loadTemperatureFloorData: function(paramQuery) {
+                 //
+                 //     console.log("query : " + paramQuery)
+                 //
+                 //     Promise.all([
+                 //         client.query(paramQuery),
+                 //     ]).then(parsedRes => {
+                 //         const mutatedArray = parsedRes.map( arr => {
+                 //             this.lastTemperatureFloorValue = arr[arr.length-1]['payload_fields_Illuminance_value'].toFixed(2); //to fixed: fix number of digit
+                 //
+                 //
+                 //             return Object.assign({}, {
+                 //
+                 //                 name: "Temperature au sol", // name on the chart
+                 //                 turboThreshold:60000,
+                 //                 tooltip: {
+                 //                     valueSuffix: ' °C'
+                 //                 },
+                 //                 data: arr.map( obj => Object.assign({}, {
+                 //                     x: (moment(obj.time).unix())*1000,
+                 //                     y: obj['payload_fields_Illuminance_value']
+                 //                 }))
+                 //             });
+                 //
+                 //         });
+                 //         this.series_temperatureFloor = mutatedArray;
+                 //         NProgress.done();
+                 //     }).catch(error => console.log(error))
+                 // },
+
+                 /**
+                  * load temperature of the sensor data from the database
+                  * @param paramQuery
+                  */
+                 // loadTemperatureSensorData: function(paramQuery) {
+                 //
+                 //     console.log("query : " + paramQuery)
+                 //
+                 //     Promise.all([
+                 //         client.query(paramQuery),
+                 //     ]).then(parsedRes => {
+                 //         const mutatedArray = parsedRes.map( arr => {
+                 //             this.lastTemperatureSensorValue = arr[arr.length-1]['payload_fields_Air temperature_value'].toFixed(2); //to fixed: fix number of digit
+                 //
+                 //
+                 //             return Object.assign({}, {
+                 //
+                 //                 name: "Temperature sensor", // name on the chart
+                 //                 turboThreshold:60000,
+                 //                 tooltip: {
+                 //                     valueSuffix: ' °C'
+                 //                 },
+                 //                 data: arr.map( obj => Object.assign({}, {
+                 //                     x: (moment(obj.time).unix())*1000,
+                 //                     y: obj['payload_fields_Air temperature_value']
+                 //                 }))
+                 //             });
+                 //
+                 //         });
+                 //         this.series_temperatureSensor = mutatedArray;
+                 //         NProgress.done();
+                 //     }).catch(error => console.log(error))
+                 // },
+
+                 /**
+                  * load Battery data from the database
+                  * @param paramQuery
+                  */
+                 loadBatterySensorData: function(paramQuery) {
+
+                     console.log("query : " + paramQuery)
+                     Promise.all([
+                         client.query(paramQuery),
+                     ]).then(parsedRes => {
+                         const mutatedArray = parsedRes.map( arr => {
+                             this.lastBatteryValue = arr[arr.length-1]['payload_fields_Battery voltage_value'].toFixed(2); //to fixed: fix number of digit
+
+
+                             return Object.assign({}, {
+
+                                 name: "Niveau de batterie", // name on the chart
+
+                                 turboThreshold:60000,
+                                 tooltip: {
+                                     valueSuffix: ' V'
+                                 },
+                                 data: arr.map( obj => Object.assign({}, {
+                                     x: (moment(obj.time).unix())*1000,
+                                     y: obj['payload_fields_Battery voltage_value']
+                                 }))
+                             });
+
+                         });
+                         this.series_battery = mutatedArray;
+
+                         NProgress.done();
+                     }).catch(error => console.log(error))
+
+
+                 },
+
+
+                 /**
+                  * load temperature floor AND temperature Sensor data from the database
+                  * @param paramQuery
+                  */
+                 dualData: function(paramQuery1,paramQuerry2) {
+                     let serie1;
+                     let serie2;
+
+
+                     Promise.all([
+                         client.query(paramQuery1),
+                     ]).then(parsedRes => {
+                          serie1 = parsedRes.map( arr => {
+                             this.dualFloorTemp = arr[arr.length-1]['payload_fields_Illuminance_value'].toFixed(2); // temperature sol
+
+                             return Object.assign({}, {
+                                 data: arr.map( obj => Object.assign({}, {
+                                     x: (moment(obj.time).unix())*1000,
+                                     y: obj['payload_fields_Illuminance_value']
+                                 }))
+                             });
+
+                         });
+
+
+                         Promise.all([
+                             client.query(paramQuerry2),
+                         ]).then(parsedRes => {
+                             serie2 = parsedRes.map( arr => {
+                                 this.dualSensorTemp = arr[arr.length-1]['payload_fields_Air temperature_value'].toFixed(2); //temperature capteur
+
+                                 return Object.assign({}, {
+                                     data: arr.map( obj => Object.assign({}, {
+                                         x: (moment(obj.time).unix())*1000,
+                                         y: obj['payload_fields_Air temperature_value']
+                                     }))
+                                 });
+
+                             });
+
+                             //build final objet to send to chart
+                             let serieFinal = [{
+                                     name : 'Temperature du sol',
+                                     color : '#4285f4', //bleu
+                                     type : 'spline',
+                                     turboThreshold:60000,           // if no data displayed : augmented it
+                                     data : serie1[0].data
+                             },{
+                                     name : 'Temperature du capteur',
+                                     color : '#f4b400', //orange
+                                     type : 'spline',
+                                     turboThreshold:60000,           // if no data displayed : augmented it
+                                     data :serie2[0].data,
+                             }]
+
+
+
+                             this.series_dual = serieFinal
+
+                             NProgress.done();
+
+                         }).catch(error => console.log(error))
+
+                     }).catch(error => console.log(error))
+                 },
+             },
+
+
+
+
+
+             data () {
+                 return {
+
+
+                     //series_temperatureFloor : [{
+                     //    turboThreshold:60000,
+                     //    data: [],
+
+                     //}],
+
+                     //series_temperatureSensor: [{
+                     //    turboThreshold:60000,
+                     //    data: [],
+
+                     //}],
+
+                     series_battery : [{
+                         turboThreshold: 60000,
+                         data: [],
+
+                     }],
+
+
+
+
+
+                     lastTemperatureFloorValue:"",
+                     lastTemperatureSensorValue:"",
+                     lastBatteryValue:"",
+
+
+                     series_dual:[{
+                         data: [],
+                     }],
+
+                     dualFloorTemp:"",
+                     dualSensorTemp:"",
+
+
+
+                 }
+
+             },
+
+         }
+
+
+
+     </script>
+
+     <style scoped>
+
+     </style>

@@ -6,7 +6,7 @@
                 <transition name="slide">
                 <b-col>
                     <l-map
-                            style="height: 850px;width: 100%"
+                            style="height: 880px;width: 100%"
                             :zoom="zoom"
                             :center="center"
                             @update:zoom="zoomUpdated"
@@ -14,17 +14,21 @@
                             @update:bounds="boundsUpdated"
                             @click="printPosition"
                             class="leaflet-control-layers-list"
+
                     >
+
                         <l-control-layers ref="control"
                                           :sort-layers="true"
                         />
-                        <l-tile-layer :url="url2" name="Carte" layer-type="base" />
-                        <l-tile-layer :url="url" name="Satellite" layer-type="base" />
+
+                        <l-tile-layer :url="url" name="Satellite" layer-type="base" />                         <!--change url by url2 and it display first satellite -->
+                        <l-tile-layer :url="url2" name="carte" layer-type="base" />                            <!--change url2 by url and it display first carte -->
 
                         <l-layer-group
                                 layer-type="overlay"
                                 name="Capteurs"
                                 :visible="true"
+
                                 >
                             <l-marker v-for="(sensor,index) in sensors" :lat-lng="sensor.position" :key="index + 10"
                                       @click="loadData(sensor.id)" :icon="sensor.icon" :visible="true">
@@ -32,7 +36,10 @@
                                     <div v-if="sensor.type===1">
                                         <h4>{{sensor.position_name}}</h4>
                                         <div>Hauteur de neige : {{sensor.pressure}} mm</div>
-                                        <div>Température du sol : {{sensor.debit}} °C</div>
+                                        <div>Température au sol : {{sensor.debit}} °C</div>
+                                        <div>Température au capteur : {{sensor.debit}} °C</div>
+
+
                                     </div>
                                     <div v-if="sensor.type===2">
                                         <h4>{{sensor.position_name}}</h4>
@@ -41,34 +48,53 @@
                                 </l-popup>
                             </l-marker>
                         </l-layer-group>
+
                         <l-layer-group
                                 layer-type="overlay"
-                                name="Antennes"
+                                name="Antennes "
                                 :visible="true">
-                            <l-marker v-for="(antenna,index) in antennas" :lat-lng="antenna.position" :key="index + 100"
+
+                            <!-- in downAntennas -->
+                            <l-marker  v-for="(antenna,index) in antennas" :lat-lng="antenna.position" :key="index + 100"
                                       @click="lastSeenAntenna(antenna.eui, antenna.id)" :icon="antenna.icon"
                                       :visible="true">
-                                <l-popup>
-                                    <h5>{{antenna.position_name}}</h5>
-                                    <div>latitude: {{antenna.position[0]}}</div>
-                                    <div>longitude: {{antenna.position[1]}}</div>
-                                    <div>Vu il y a : {{antenna.lastSeen}} secondes</div>
+
+                                <l-popup v-if="antenna.isUp == true">
+
+                                        <h5>{{antenna.position_name}}</h5>
+                                        <div>latitude: {{antenna.position[0]}}</div>
+                                        <div>longitude: {{antenna.position[1]}}</div>
+                                        <div>Vu il y a : {{antenna.lastSeen}} secondes</div>
+
+                                </l-popup>
+                                <l-popup v-else>
+                                        <h5>{{antenna.position_name}}</h5>
+                                        <div>latitude: {{antenna.position[0]}}</div>
+                                        <div>longitude: {{antenna.position[1]}}</div>
+                                        <div> DOWN depuis {{antenna.timestamp}}</div>
+
                                 </l-popup>
                             </l-marker>
                         </l-layer-group>
+
+
                     </l-map>
                 </b-col>
                 </transition>
-                <b-button squared variant="outline-secondary" @click="toggleStatus" style="height: fit-content; align-self: center"><img :src="arrow" /></b-button>
+
+                <!--Button Status--> <!-- delete layer group to see the button-->
+
+ <!--               <b-button   squared variant="null" @click="toggleStatus" style="height: fit-content; align-self: center"><img :src="arrow" /></b-button>
                 <transition name="slide">
-                <b-col v-if="showStatus" cols="3" class="align-self-center">
+
+                    <b-col v-if="showStatus" cols="3" class="align-self-center">
                     <b-card>
                         <div class="lucida">
                             <h1>Status antennes</h1>
                             <pre>Prochain test dans {{seconds}} secondes...</pre>
                             <div class="">
                                 <div v-for="(antenna, index) in antennas" :key="index+200">
-                                    <div v-if="antenna.isUp">
+                                          <div v-if="antenna.isUp">
                                         <p class="text-left">> {{antenna.position_name}}</p>
                                         <pre class="text-left">     <span style="color: green">OK</span> </pre>
                                     </div>
@@ -83,12 +109,15 @@
                         </div>
                     </b-card>
                 </b-col>
-                </transition>
+               </transition> -->
+
             </b-row>
         </b-container>
     </div>
 
 </template>
+
+
 <script>
     import {LMap, LTileLayer, LMarker, LPopup, LControlLayers, LLayerGroup} from 'vue2-leaflet'
     import Influx from 'influx'
@@ -96,6 +125,7 @@
     import L from 'leaflet'
     import axios from 'axios'
     import credInflux from '../constants/influx'
+
 
 
     delete Icon.Default.prototype._getIconUrl;
@@ -123,7 +153,7 @@
         data() {
             return {
                 arrow: require('../assets/svg/left_arrow.svg'),
-                showStatus:false,
+                showStatus:false,                                                                                       //right button to show antenna status
                 timer: null,
                 timerIsRunning: false,
                 seconds: 30,
@@ -140,29 +170,29 @@
                 sensors: [{
                     type: 1,
                     id: 1,
-                    position_name: 'cuisine',
+                    position_name: 'Télécabine',
                     pressure: "-",
                     debit: "-",
                     level: "-",
-                    position: [46.324711, 7.500271],
+                    position: [46.29411, 7.39557],
                     icon: this.deviceIcon()
                 }, {
                     type: 1,
                     id: 2,
-                    position_name: 'douche',
+                    position_name: 'Pralan',
                     pressure: "-",
                     debit: "-",
                     level: "none",
-                    position: [46.324684, 7.500231],
+                    position: [46.29894, 7.40549],
                     icon: this.deviceIcon()
                 }, {
                     type: 2,
                     id: 3,
-                    position_name: 'extérieur',
+                    position_name: 'Pro de Savioz',
                     pressure: "-",
                     debit: "-",
                     level: "none",
-                    position: [46.324739, 7.500137],
+                    position: [46.26721, 7.39827],
                     icon: this.deviceIcon()
                 }],
                 antennas: [{
@@ -207,12 +237,15 @@
                     isUp: false,
                 }],
                 response: "",
+                downAntennas:[],
             }
         },
         created() {
             this.checkAntenna();
+    //        this.activeGateways();
             this.startTimer();
-            //this.checkDevice();
+            this.checkDevice();
+
         },
         mounted() {
 
@@ -223,7 +256,7 @@
             clearInterval(this.timer);
         },
         methods: {
-            // checkDevice(){
+            checkDevice(){
             //     var appID = "altis-irrigation-app";
             //     var accessKey = "ttn-account-v2.YdStTLbI0FKK9DfIFVo8fYKQdw23ct_WGeVZHWp2F3w";
             //     console.log("Program running");
@@ -237,7 +270,7 @@
             //         .catch(function (error) {
             //             console.error("Error", error);
             //         });
-            // },
+             },
             toggleStatus(){
                 if (this.showStatus){
                     this.arrow = require('../assets/svg/left_arrow.svg')
@@ -259,6 +292,7 @@
                 if (this.seconds <= 0) {
                     this.seconds = 30;
                     this.checkAntenna();
+
                 }
                 else if (this.seconds < 31) {
                     this.seconds--;
@@ -410,16 +444,40 @@
                         if (this.secondBetweenDate(now, timestamp) < 60) {
                             this.antennas[i].icon = this.antennaIconUp();
                             this.antennas[i].isUp = true;
+                            console.log("check antenna : up")
+
                         } else {
                             this.antennas[i].icon = this.antennaIconDown();
                             this.antennas[i].isUp = false;
+                            console.log("check antenna : down")
+                            this.downGateways(i)
                         }
+
                     });
+
                 }
+
 
             },
             secondBetweenDate(date1, date2) {
                 return Math.ceil(Math.abs(date1 - date2) / 1000);
+            },
+
+            downGateways(i){
+
+                console.log("activeGateways, home.vue l 436")
+
+                        this.downAntennas[i] = this.antennas[i]
+                        console.log(i)
+                        console.log(this.antennas[i].isUp)
+
+                console.log("active")
+                for (let j = 0; j < this.downAntennas.length; j++) {
+
+                    console.log(j)
+                    console.log(this.downAntennas[j])
+                }
+
             }
 
         },
@@ -428,6 +486,8 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
     @import "../../node_modules/leaflet/dist/leaflet.css";
+
+
 
     .lucida h1 {
         font-family: "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;

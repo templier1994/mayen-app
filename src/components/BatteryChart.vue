@@ -5,11 +5,36 @@
 <script>
     export default {
         props : [
-            'data',
+            'dataBatteryChart',
+
         ],
         data () {
             return {
                 stockOptions: {
+                    title:{
+                        text : "Niveau de batterie"
+                    },
+                    chart:{
+                        style:{
+                            fontFamily: 'Roboto'
+                        }
+                    },
+
+
+                    yAxis: [{ // Primary yAxis
+                        title: {
+                            text: 'Niveau de batterie',
+                            style : {
+                                color :  '#7cb5ec'
+                            },
+                        },
+                        labels: {
+                            format: '{value} V',
+                        },
+
+                        opposite : true
+
+                    }],
                     rangeSelector: {
                         selected: 'all',
                         buttons: [{
@@ -37,15 +62,28 @@
                             text: 'All'
                         }]
                     },
-                    series: this.data
+                    series: this.dataBatteryChart,
+
+                    legend :{
+                        enabled : true,
+                        layout: 'vertical',
+                        align: 'left',
+                        x: 30,
+                        verticalAlign: 'top',
+                        y: 65,
+                        floating: true,
+
+                    },
+
                 }
             }
         },
+
+
         watch: {
-            data (newValue) {
+            dataBatteryChart (newValue) {
                 this.stockOptions.series = newValue
             },
-
         }
     }
 </script>
